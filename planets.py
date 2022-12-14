@@ -2,8 +2,6 @@
 import numpy as np
 import numpy.linalg as la
 
-import time
-
 import pygame
 
 global G 
@@ -19,6 +17,8 @@ class planet():
         self.vel = np.array(vel)
         self.mass = mass
 
+        self.posList = []
+
 
     def updateState(self,deltaT,planetList):
 
@@ -30,9 +30,7 @@ class planet():
 
                 rUnit = r/la.norm(r)
 
-                print(r)
-
-                forceVec = (G*self.mass*planet.mass/la.norm(r))*rUnit
+                forceVec = (G*self.mass*planet.mass/la.norm(r)**2)*rUnit
 
                 force = np.add(force,forceVec)
 
@@ -40,6 +38,15 @@ class planet():
 
         self.pos = self.pos + np.multiply(self.vel,deltaT) + np.multiply(self.acc,deltaT**(2)/2)
         self.vel = self.vel + np.multiply(self.acc,deltaT)
+
+
+
+    def savePos(self,pos):
+
+        if pos != self.posList[-1]:
+            self.posList.append(pos)
+
+
 
 def posToPixel(pos,xHeight,yWidth,pixHeight,pixWidth):
     pixPosX = int((pos[0]/xHeight)*pixHeight)
@@ -59,28 +66,28 @@ def main():
 
     origin = [100,yHeight-groundHeight]
 
-    heightOfScreen = 1000
-    widthOfScreen = 1000
+    heightOfScreen = 667
+    widthOfScreen = 667
 
     pygame.init()
     screen = pygame.display.set_mode((heightOfScreen,widthOfScreen))
 
-    screen.fill((0,0,255))
-
-    pygame.display.update()
-
     planetList = []
     planetNum = 0
 
-    while True:
+    background = pygame.image.load("space.jpeg")
+    planetImg = pygame.image.load("planet.png").convert_alpha()
 
-        screen.fill((0,0,255))
+    #planetImg = pygame.transform.scale(screen,(500,500))
+
+    #planetImg = planetImg.convert_alpha()
+
+    while True:
 
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_presses = pygame.mouse.get_pressed()
                 if mouse_presses[0]:
-                    print("Left Mouse key was clicked")
                     	
                     pos = np.array(pygame.mouse.get_pos())
 
@@ -95,14 +102,14 @@ def main():
         for onePlanet in planetList:
             onePlanet.updateState(1,planetList)
 
-        
+        screen.blit(background,(0, 0))
+
         for onePlanet in planetList:
             pixPos = posToPixel(onePlanet.pos,xHeight,yHeight,heightOfScreen,widthOfScreen)
-            pygame.draw.circle(screen,(255,0,0),(pixPos[0],pixPos[1]),10)
+            #pygame.draw.circle(screen,(255,0,0),(pixPos[0],pixPos[1]),10)
+            screen.blit(planetImg,(pixPos[0],pixPos[1]))
 
-
-        pygame.display.update()    
-        time.sleep(0.1)
+        pygame.display.flip()
 
 if __name__ == "__main__":
     main()
