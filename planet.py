@@ -2,7 +2,9 @@
 import numpy as np
 import numpy.linalg as la
 
-import pygame
+import threading
+
+import time
 
 global G 
 G = 6.67430e-11
@@ -38,6 +40,11 @@ class planet():
 
         self.pos = self.pos + np.multiply(self.vel,deltaT) + np.multiply(self.acc,deltaT**(2)/2)
         self.vel = self.vel + np.multiply(self.acc,deltaT)
+
+
+    def threadedUpdateState(self,deltaT,planetList):
+        self.t = threading.Thread(target=self.updateState,args=(deltaT,planetList))
+        self.t.start()
 
     def savePos(self,pos):
 
